@@ -1,16 +1,45 @@
-name: Build Flyzer
-on: [push, workflow_dispatch]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: 21 }
-      - uses: gradle/actions/setup-gradle@v4
-        with: { gradle-version: 8.12 }
-      - run: gradle build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Flyzer-jar
-          path: build/libs/Flyzer-*.jar
+plugins {
+    id 'fabric-loom' version '1.9-SNAPSHOT'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base { archivesName = project.archives_base_name }
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+// Плоска структура: усі файли лежать у корені репозиторію
+sourceSets {
+    main {
+        java {
+            srcDirs = ['.']
+            include '*.java'
+        }
+        resources {
+            srcDirs = []
+        }
+    }
+}
+
+processResources {
+    from('.') { include 'fabric.mod.json', 'flyzer.mixins.json' }
+    from('.') {
+        include 'en_us.json'
+        into 'assets/flyzer/lang'
+    }
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") { expand "version": project.version }
+}
+
+tasks.withType(JavaCompile).configureEach { it.options.release = 21 }
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
