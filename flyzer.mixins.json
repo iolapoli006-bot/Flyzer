@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "dev.flyzer.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["SimpleOptionMixin"],
+  "injectors": { "defaultRequire": 1 }
+}
